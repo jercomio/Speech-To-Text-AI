@@ -99,8 +99,12 @@ const index = () => {
                                     className='w-96'
                                     value={field.value}
                                     onChange={(e) => {
-                                        field.onChange(e)
-                                    }} 
+                                        // const value = e.target.value
+                                        // if (!/[<>?!/]/.test(value)) {
+                                            field.onChange(e)
+                                        // }
+                                    }}
+                                    // {...field}  
                                 />
                             </FormControl>
                             <Button onClick={() => {
