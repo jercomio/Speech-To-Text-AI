@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Mic, Square, Trash2 } from 'lucide-react';
 import { openai } from '@/lib/openai';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,12 +14,14 @@ import { z } from 'zod';
 const FormSchema = z.object({
     openaiKey: z.string().min(2, {
       message: "OpenAI Key must be valid !",
+    }).regex(/^[^<>?!\/\(\)\{\}\[\]\*]*$/, {
+        message: "Error: Invalid characters detected."
     }),
 })
 
 
 const index = () => {
-    const [value, setValue, removeValue] = useLocalStorage<string>('openai-key', '')
+    const [keyValue, setKeyValue, removeKeyValue] = useLocalStorage<string>('openai-key', '')
     const [transcription, setTranscription] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const [isMediaDevicesAvailable, setIsMediaDevicesAvailable] = useState(false);
@@ -39,7 +42,7 @@ const index = () => {
     })
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        setValue(data.openaiKey)
+        setKeyValue(data.openaiKey)
       }
 
     const handleSpeechRecognition = async () => {
@@ -61,7 +64,7 @@ const index = () => {
                 const audioFile = new File([audioBlob], 'audio.mp3', { type: 'audio/mp3' });
                 
                 try {
-                    const response = await openai(value).audio.transcriptions.create({
+                    const response = await openai(keyValue).audio.transcriptions.create({
                         file: audioFile,
                         model: 'whisper-1',
                     })
@@ -87,9 +90,24 @@ const index = () => {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel className='text-gray-300'>Enter your private OpenAI Key</FormLabel>
-                        <FormControl>
-                            <Input type='password' placeholder="OpenAI Key" {...field} className='w-72' />
-                        </FormControl>
+                        <div className='flex gap-2'>
+                            <FormControl>
+                                <Input 
+                                    type='password' 
+                                    id='password'
+                                    placeholder="OpenAI Key" 
+                                    className='w-96'
+                                    value={field.value}
+                                    onChange={(e) => {
+                                        field.onChange(e)
+                                    }} 
+                                />
+                            </FormControl>
+                            <Button onClick={() => {
+                                removeKeyValue()
+                                field.onChange('')
+                            }} className='text-gray-300'><Trash2 className='size-4' /></Button>
+                        </div>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -98,22 +116,21 @@ const index = () => {
                         <Button type="submit">Validate</Button>
                         <Button
                             onClick={() => {
-                            removeValue()
+                            removeKeyValue()
                             }}
                         >
                             Remove OpenAI Key
                         </Button>
                     </div>
-                    <p className='text-xs text-orange-500'>To remove your key, empty the field then click on the button Remove</p>
                 </form>
             </Form>
 
             {
-                value !== '' ? (
+                keyValue !== '' ? (
                     <div className='flex justify-center items-center gap-4'>
                         <Input type='text' value={transcription} readOnly className='w-72' />
                         <Button onClick={handleSpeechRecognition} disabled={!isMediaDevicesAvailable}>
-                            {isRecording ? 'Stop' : 'Speech'}
+                            {isRecording ? <Square className='text-red-500' /> : <Mic />}
                         </Button>
                     </div>
                 ) : null

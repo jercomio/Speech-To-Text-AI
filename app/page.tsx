@@ -8,7 +8,7 @@ export default function Home() {
           <h2 className='text-xl font-semibold uppercase'>Speech To Text with Whisper Recognize</h2>
           <p className='text-gray-300'>This is a small application to test the Whisper Recognize function from OpenAI.</p>
         </div>
-        <div className='flex justify-center items-center bg-black border border-gray-800 rounded-lg w-1/2 py-10'>
+        <div className='flex justify-center items-center bg-white/5 border border-gray-800 rounded-lg w-1/2 py-10'>
           <TranscriptionForm />
         </div>
       </div>
