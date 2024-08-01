@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { z } from 'zod';
+import { cn } from '@/lib/utils';
 
 const FormSchema = z.object({
     openaiKey: z.string().min(2, {
@@ -110,18 +111,19 @@ const index = () => {
                             <Button onClick={() => {
                                 removeKeyValue()
                                 field.onChange('')
-                            }} className='text-gray-300'><Trash2 className='size-4' /></Button>
+                            }} className='text-gray-300 border border-black/0 hover:border hover:border-gray-600'><Trash2 className='size-4' /></Button>
                         </div>
                         <FormMessage />
                         </FormItem>
                     )}
                     />
                     <div className='flex gap-4'>
-                        <Button type="submit">Validate</Button>
+                        <Button type="submit" className='border border-black/0 hover:border hover:border-gray-600'>Validate</Button>
                         <Button
                             onClick={() => {
                             removeKeyValue()
                             }}
+                            className='border border-black/0 hover:border hover:border-gray-600'
                         >
                             Remove OpenAI Key
                         </Button>
@@ -133,8 +135,22 @@ const index = () => {
                 keyValue !== '' ? (
                     <div className='flex justify-center items-center gap-4'>
                         <Input type='text' value={transcription} readOnly className='w-72' />
-                        <Button onClick={handleSpeechRecognition} disabled={!isMediaDevicesAvailable}>
-                            {isRecording ? <Square className='text-red-500' /> : <Mic />}
+                        <Button 
+                            onClick={handleSpeechRecognition} 
+                            disabled={!isMediaDevicesAvailable} 
+                            className={cn(
+                                'group border',
+                                isRecording ? 'border-red-500 hover:border-red-900 hover:bg-red-500' : 'border-black/0 hover:border-gray-600'
+                            )}
+                        >
+                            {isRecording ? 
+                                <Square 
+                                    className={cn(
+                                        isRecording ? 'text-red-500 group-hover:text-gray-300' : 'text-red-500'
+                                    )} 
+                                /> 
+                                : <Mic />
+                            }
                         </Button>
                     </div>
                 ) : null
