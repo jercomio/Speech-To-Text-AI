@@ -7,7 +7,7 @@ import { openai } from '@/lib/openai';
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { z } from 'zod';
 
 const FormSchema = z.object({
@@ -41,20 +41,6 @@ const index = () => {
     function onSubmit(data: z.infer<typeof FormSchema>) {
         setValue(data.openaiKey)
       }
-
-    // let openaiKey = localStorage.getItem("openai-key") ?? ""
-
-    // if (!openaiKey) {
-    //     const newKey = window.prompt("Please enter your OpenAI API key:")
-
-    //     if (!newKey) {
-    //     return
-    //     }
-        
-    //     localStorage.setItem("openai-key", newKey)
-    //     openaiKey = newKey
-        
-    // }
 
     const handleSpeechRecognition = async () => {
         if (isRecording) {
