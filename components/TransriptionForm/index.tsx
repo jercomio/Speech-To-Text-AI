@@ -21,7 +21,7 @@ const FormSchema = z.object({
 })
 
 
-const index = () => {
+const TranscriptionForm = () => {
     const [keyValue, setKeyValue, removeKeyValue] = useLocalStorage<string>('openai-key', '')
     const [transcription, setTranscription] = useState('');
     const [isRecording, setIsRecording] = useState(false);
@@ -159,4 +159,4 @@ const index = () => {
     );
 };
 
-export default index;
+export default TranscriptionForm;
