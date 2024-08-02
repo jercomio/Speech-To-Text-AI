@@ -11,6 +11,12 @@ import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
+import TranscriptionHistory from '../History';
+
+export type Recordings = {
+    file: File; 
+    transcription: string;
+}
 
 const FormSchema = z.object({
     openaiKey: z.string().min(2, {
@@ -23,11 +29,13 @@ const FormSchema = z.object({
 
 const TranscriptionForm = () => {
     const [keyValue, setKeyValue, removeKeyValue] = useLocalStorage<string>('openai-key', '')
-    const [transcription, setTranscription] = useState('');
+    const [transcription, setTranscription] = useState<string>('');
     const [isRecording, setIsRecording] = useState(false);
     const [isMediaDevicesAvailable, setIsMediaDevicesAvailable] = useState(false);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+
+    const [recordings, setRecordings] = useState<Recordings[]>([]); // Add a state to save the recordings
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ audio: true })
@@ -44,7 +52,8 @@ const TranscriptionForm = () => {
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
         setKeyValue(data.openaiKey)
-      }
+    }
+
 
     const handleSpeechRecognition = async () => {
         if (isRecording) {
@@ -70,6 +79,7 @@ const TranscriptionForm = () => {
                         model: 'whisper-1',
                     })
                     setTranscription(response.text);
+                    setRecordings(prev => [...prev, { file: audioFile, transcription: response.text }]); // Save the recording
                 } catch (error) {
                     console.error('Error during transcription:', error);
                 }
@@ -78,7 +88,8 @@ const TranscriptionForm = () => {
             mediaRecorder.start();
             setIsRecording(true);
         }
-    };
+    }
+
 
     return (
         <div className='flex flex-col gap-8'>
@@ -121,11 +132,12 @@ const TranscriptionForm = () => {
                         <Button type="submit" className='border border-black/0 hover:border hover:border-gray-600'>Validate</Button>
                         <Button
                             onClick={() => {
-                            removeKeyValue()
+                                setRecordings([])
+                                setTranscription('')
                             }}
                             className='border border-black/0 hover:border hover:border-gray-600'
                         >
-                            Remove OpenAI Key
+                            Clear history
                         </Button>
                     </div>
                 </form>
@@ -152,6 +164,13 @@ const TranscriptionForm = () => {
                                 : <Mic />
                             }
                         </Button>
+                    </div>
+                ) : null
+            }
+            {
+                recordings.length > 0 ? (
+                    <div className='flex flex-col items-center gap-4 w-full'>
+                        <TranscriptionHistory recordings={recordings} />
                     </div>
                 ) : null
             }
