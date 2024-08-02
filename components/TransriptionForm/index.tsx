@@ -81,10 +81,10 @@ const TranscriptionForm = () => {
     };
 
     return (
-        <div className='flex flex-col justify-start items-start gap-4'>
+        <div className='flex flex-col gap-8'>
             
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <FormField
                     control={form.control}
                     name="openaiKey"
@@ -97,7 +97,7 @@ const TranscriptionForm = () => {
                                     type='password' 
                                     id='password'
                                     placeholder="OpenAI Key" 
-                                    className='w-96'
+                                    className='w-full'
                                     value={field.value}
                                     onChange={(e) => {
                                         // const value = e.target.value
@@ -134,7 +134,7 @@ const TranscriptionForm = () => {
             {
                 keyValue !== '' ? (
                     <div className='flex justify-center items-center gap-4'>
-                        <Input type='text' value={transcription} readOnly className='w-72' />
+                        <Input type='text' value={transcription} readOnly className='w-full' />
                         <Button 
                             onClick={handleSpeechRecognition} 
                             disabled={!isMediaDevicesAvailable} 
