@@ -1,9 +1,9 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
+import { useLocalStorage, useMediaQuery } from 'usehooks-ts';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Mic, Square, Trash2 } from 'lucide-react';
+import { Github, Mic, Square, Trash2 } from 'lucide-react';
 import { openai } from '@/lib/openai';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,23 @@ import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
+import HistoryDesktop from '../History/Desktop/desktop';
+import HistoryMobile from '../History/Mobile/mobile';
+import Link from 'next/link';
+import SettingsButton from '../Buttons/SettingsButton';
+import VoiceAi from '../Icons/voice-ai';
+
+export type Recordings = {
+    file: File; 
+    transcription: string;
+}
+export type RecordingsToStore = {
+    transcription: string;
+    fileName: string;
+    fileType: string;
+    date: string | null;
+    file: File;
+}
 
 const FormSchema = z.object({
     openaiKey: z.string().min(2, {
@@ -23,11 +40,16 @@ const FormSchema = z.object({
 
 const TranscriptionForm = () => {
     const [keyValue, setKeyValue, removeKeyValue] = useLocalStorage<string>('openai-key', '')
-    const [transcription, setTranscription] = useState('');
+    const [transcription, setTranscription] = useState<string>('');
     const [isRecording, setIsRecording] = useState(false);
     const [isMediaDevicesAvailable, setIsMediaDevicesAvailable] = useState(false);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
+
+    const [recordings, setRecordings] = useState<Recordings[]>([]); // Add a state to save the recordings
+    const [HistoryBackup, setHistoryBackup, removeHistoryBackup] = useLocalStorage<RecordingsToStore[]>('history', [])
+    console.log(recordings)
+    const matches = useMediaQuery('(min-width: 768px)');
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ audio: true })
@@ -44,7 +66,8 @@ const TranscriptionForm = () => {
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
         setKeyValue(data.openaiKey)
-      }
+    }
+
 
     const handleSpeechRecognition = async () => {
         if (isRecording) {
@@ -70,6 +93,10 @@ const TranscriptionForm = () => {
                         model: 'whisper-1',
                     })
                     setTranscription(response.text);
+                    
+                    setRecordings(prev => [...prev, { file: audioFile, transcription: response.text }]); // Save the recording
+                    
+                    
                 } catch (error) {
                     console.error('Error during transcription:', error);
                 }
@@ -78,10 +105,22 @@ const TranscriptionForm = () => {
             mediaRecorder.start();
             setIsRecording(true);
         }
-    };
+    }
+
+    useEffect(() => {
+        const recordingsToStore: RecordingsToStore[] = recordings.map(recording => ({
+            transcription: recording.transcription,
+            fileName: recording.file?.name || 'Unknown',
+            fileType: recording.file?.type || 'Unknown',
+            date: recording.file ? new Date(recording.file.lastModified).toISOString() : null,
+            file: recording.file // Add the file property here
+        }));
+        setHistoryBackup(recordingsToStore);
+    }, [recordings, setHistoryBackup])
+
 
     return (
-        <div className='flex flex-col gap-8'>
+        <div className='flex flex-col gap-8 w-full px-4 md:w-1/2'>
             
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -90,7 +129,7 @@ const TranscriptionForm = () => {
                     name="openaiKey"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel className='text-gray-300'>Enter your private OpenAI Key</FormLabel>
+                        <FormLabel className='text-zinc-300'>Enter your private OpenAI Key</FormLabel>
                         <div className='flex gap-2'>
                             <FormControl>
                                 <Input 
@@ -111,21 +150,22 @@ const TranscriptionForm = () => {
                             <Button onClick={() => {
                                 removeKeyValue()
                                 field.onChange('')
-                            }} className='text-gray-300 border border-black/0 hover:border hover:border-gray-600'><Trash2 className='size-4' /></Button>
+                            }} className='text-zinc-300 border border-black/0 hover:border hover:border-zinc-600'><Trash2 className='size-4' /></Button>
                         </div>
                         <FormMessage />
                         </FormItem>
                     )}
                     />
                     <div className='flex gap-4'>
-                        <Button type="submit" className='border border-black/0 hover:border hover:border-gray-600'>Validate</Button>
+                        <Button type="submit" className='border border-black/0 hover:border hover:border-zinc-600'>Validate</Button>
                         <Button
                             onClick={() => {
-                            removeKeyValue()
+                                setRecordings([])
+                                setTranscription('')
                             }}
-                            className='border border-black/0 hover:border hover:border-gray-600'
+                            className='border border-black/0 hover:border hover:border-zinc-600'
                         >
-                            Remove OpenAI Key
+                            Clear history
                         </Button>
                     </div>
                 </form>
@@ -140,18 +180,27 @@ const TranscriptionForm = () => {
                             disabled={!isMediaDevicesAvailable} 
                             className={cn(
                                 'group border',
-                                isRecording ? 'border-red-500 hover:border-red-900 hover:bg-red-500' : 'border-black/0 hover:border-gray-600'
+                                isRecording ? 'border-red-500 hover:border-red-900 hover:bg-red-500' : 'border-black/0 hover:border-zinc-600'
                             )}
                         >
                             {isRecording ? 
-                                <Square 
-                                    className={cn(
-                                        isRecording ? 'text-red-500 group-hover:text-gray-300' : 'text-red-500'
-                                    )} 
-                                /> 
-                                : <Mic />
+                                // <Square 
+                                //     className={cn(
+                                //         isRecording ? 'text-red-500 group-hover:text-zinc-300' : 'text-red-500'
+                                //     )} 
+                                // /> 
+                                <VoiceAi width='24' height='24' fill='currentColor' className='animate-pulse group-hover:fill-red-500' />
+                                : <VoiceAi width='24' height='24' />
                             }
                         </Button>
+                    </div>
+                ) : null
+            }
+            {
+                recordings.length > 0 ? (
+                    <div className='flex flex-row justify-end items-center gap-2 w-full'>
+                        {matches ? <HistoryDesktop recordings={HistoryBackup} /> : <HistoryMobile recordings={HistoryBackup} />}
+                        <SettingsButton />
                     </div>
                 ) : null
             }
