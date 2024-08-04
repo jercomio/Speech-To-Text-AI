@@ -36,7 +36,6 @@ const HistoryDesktop: React.FC<Props> = ({recordings}) => {
                                 <TableBody>
                                     {
                                         recordings.map((recording, idx) => {
-                                            // const formattedDate = new Date(recording.file.lastModified).toLocaleString('en-EN')
                                             const formattedDate = new Date(recording.date!).toLocaleString('en-EN')
                             
                                             return (

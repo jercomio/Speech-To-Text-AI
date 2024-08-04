@@ -48,7 +48,7 @@ const TranscriptionForm = () => {
 
     const [recordings, setRecordings] = useState<Recordings[]>([]); // Add a state to save the recordings
     const [HistoryBackup, setHistoryBackup, removeHistoryBackup] = useLocalStorage<RecordingsToStore[]>('history', [])
-    console.log(recordings)
+    
     const matches = useMediaQuery('(min-width: 768px)');
 
     useEffect(() => {
@@ -139,12 +139,8 @@ const TranscriptionForm = () => {
                                     className='w-full'
                                     value={field.value}
                                     onChange={(e) => {
-                                        // const value = e.target.value
-                                        // if (!/[<>?!/]/.test(value)) {
-                                            field.onChange(e)
-                                        // }
-                                    }}
-                                    // {...field}  
+                                        field.onChange(e)
+                                    }} 
                                 />
                             </FormControl>
                             <Button onClick={() => {
@@ -158,15 +154,6 @@ const TranscriptionForm = () => {
                     />
                     <div className='flex gap-4'>
                         <Button type="submit" className='border border-black/0 hover:border hover:border-zinc-600'>Validate</Button>
-                        <Button
-                            onClick={() => {
-                                setRecordings([])
-                                setTranscription('')
-                            }}
-                            className='border border-black/0 hover:border hover:border-zinc-600'
-                        >
-                            Clear history
-                        </Button>
                     </div>
                 </form>
             </Form>
@@ -184,11 +171,6 @@ const TranscriptionForm = () => {
                             )}
                         >
                             {isRecording ? 
-                                // <Square 
-                                //     className={cn(
-                                //         isRecording ? 'text-red-500 group-hover:text-zinc-300' : 'text-red-500'
-                                //     )} 
-                                // /> 
                                 <VoiceAi width='24' height='24' fill='currentColor' className='animate-pulse group-hover:fill-red-500' />
                                 : <VoiceAi width='24' height='24' />
                             }
