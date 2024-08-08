@@ -1,9 +1,9 @@
 'use client'
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useLocalStorage, useMediaQuery } from 'usehooks-ts';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Github, Mic, Square, Trash2 } from 'lucide-react';
+import { Github, Trash2 } from 'lucide-react';
 import { openai } from '@/lib/openai';
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,7 +13,6 @@ import { z } from 'zod';
 import { cn } from '@/lib/utils';
 import HistoryDesktop from '../History/Desktop/desktop';
 import HistoryMobile from '../History/Mobile/mobile';
-import Link from 'next/link';
 import SettingsButton from '../Buttons/SettingsButton';
 import VoiceAi from '../Icons/voice-ai';
 
@@ -48,8 +47,9 @@ const TranscriptionForm = () => {
 
     const [recordings, setRecordings] = useState<Recordings[]>([]); // Add a state to save the recordings
     const [HistoryBackup, setHistoryBackup, removeHistoryBackup] = useLocalStorage<RecordingsToStore[]>('history', [])
-    
+
     const matches = useMediaQuery('(min-width: 768px)');
+
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ audio: true })
@@ -96,7 +96,6 @@ const TranscriptionForm = () => {
                     
                     setRecordings(prev => [...prev, { file: audioFile, transcription: response.text }]); // Save the recording
                     
-                    
                 } catch (error) {
                     console.error('Error during transcription:', error);
                 }
@@ -116,6 +115,7 @@ const TranscriptionForm = () => {
             file: recording.file // Add the file property here
         }));
         setHistoryBackup(recordingsToStore);
+
     }, [recordings, setHistoryBackup])
 
 

@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
 
+
 export const metadata: Metadata = {
   title: "Voice Transcript",
   description: "Speech To Text with Whisper Recognize",
+  keywords: "voice, transcript, openai, ai, speech-to-text"
 };
 
 export default function RootLayout({

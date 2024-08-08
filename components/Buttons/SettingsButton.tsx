@@ -1,5 +1,5 @@
 'use client'
-import React from 'react';
+import React, { useState } from 'react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,10 +12,12 @@ import { History, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLocalStorage } from 'usehooks-ts';
 import { Recordings } from '../TransriptionForm';
+import { useRouter } from 'next/navigation';
 
 
 const SettingsButton = () => {
     const [HistoryBackup, setHistoryBackup, removeHistoryBackup] = useLocalStorage<Recordings[]>('history', [])
+    const router = useRouter()
 
     return (
         <div>
@@ -26,7 +28,12 @@ const SettingsButton = () => {
                 <DropdownMenuContent className='bg-black w-full border border-zinc-500'>
                     <DropdownMenuLabel className='text-zinc-300 text-xs'>Settings</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => removeHistoryBackup()} className='text-zinc-300 text-xs'>
+                    <DropdownMenuItem onClick={() => {
+                            removeHistoryBackup()
+                            router.refresh()
+                        }} 
+                        className='text-zinc-300 text-xs'
+                    >
                         <History className='size-3 mr-2' />
                         Clear history
                     </DropdownMenuItem>
